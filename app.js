@@ -95,23 +95,18 @@ app.post("/user", async (req, res) => {
   try {
     const { username, password, name, role } = req.body;
 
-    // Vérifiez que toutes les données nécessaires sont présentes
     if (!username || !password || !name || !role) {
       return res.status(400).json({ message: "Tous les champs sont requis." });
     }
-
-    // Créez un nouvel utilisateur
     const newUser = new User({
       username,
-      password, // Hachez le mot de passe avant de l'enregistrer (voir Étape 3)
+      password,
       name,
       role,
     });
 
-    // Sauvegardez dans la base de données
     const savedUser = await newUser.save();
 
-    // Réponse en cas de succès
     res.status(201).json(savedUser);
   } catch (err) {
     console.error("Erreur lors de la création de l'utilisateur :", err);
@@ -129,7 +124,7 @@ app.get("/user/:username", async (req, res) => {
     const userJson = JSON.stringify(user);
     const hash = etag(userJson);
     if (req.headers["if-none-match"] === hash) {
-      return res.status(304).send(); // Pas de modifications, renvoyer 304 Not Modified
+      return res.status(304).send();
     }
     res.setHeader("ETag", hash);
     res.status(200).json(user);
@@ -148,7 +143,7 @@ app.put("/user/:username", async (req, res) => {
   console.log(clientETag);
   console.log(currentETag);
   if (clientETag !== currentETag) {
-    return res.status(412).send("Precondition Failed: ETag mismatch"); // 412 Precondition Failed
+    return res.status(412).send("Precondition Failed: ETag mismatch");
   }
   user.name = req.body.name;
   const updatedUser = await user.save();
