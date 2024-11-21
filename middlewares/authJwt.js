@@ -25,11 +25,20 @@ isExist = async (req, res, next) => {
     res.status(403).send({ message: "User not found" });
     return;
   }
+
   next();
+};
+
+isAdmin = async (req, res, next) => {
+  const user = await User.findById(req.userId);
+  return user?.role === "admin"
+    ? next()
+    : res.status(403).send({ message: "User not authorized" });
 };
 
 const authJwt = {
   verifyToken,
   isExist,
+  isAdmin,
 };
 module.exports = authJwt;

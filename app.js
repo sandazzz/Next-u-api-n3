@@ -5,6 +5,7 @@ const Todo = require("./todo");
 const User = require("./models/user");
 const authcontroller = require("./controller/authcontroller");
 const authJwt = require("./middlewares/authJwt");
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,7 +29,7 @@ app.get(
 );
 app.post(
   "/api/todos",
-  [authJwt.verifyToken, authJwt.isExist],
+  [authJwt.verifyToken, authJwt.isExist, authJwt.isAdmin],
   async (req, res) => {
     try {
       const newTodo = new Todo({
@@ -66,7 +67,7 @@ app.get(
 );
 app.put(
   "/api/todos/:id",
-  [authJwt.verifyToken, authJwt.isExist],
+  [authJwt.verifyToken, authJwt.isExist,authJwt.isAdmin],
   async (req, res) => {
     const todo = await Todo.findById(req.params.id);
     if (!todo) {
