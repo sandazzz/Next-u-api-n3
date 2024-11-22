@@ -1,10 +1,13 @@
 const express = require("express");
 const etag = require("etag");
 const mongoose = require("mongoose");
-const Todo = require("./todo");
+
+const Todo = require("./models/todo");
 const User = require("./models/user");
+
 const authcontroller = require("./controller/authcontroller");
 const authJwt = require("./middlewares/authJwt");
+const rateLimiter = require("./middlewares/rateLimiter");
 
 const app = express();
 app.use(express.json());
@@ -16,7 +19,7 @@ mongoose
 
 app.get(
   "/api/todos",
-  [authJwt.verifyToken, authJwt.isExist],
+  [authJwt.verifyToken, authJwt.isExist, rateLimiter],
   async (req, res) => {
     try {
       const todos = await Todo.find();
@@ -27,6 +30,7 @@ app.get(
     }
   }
 );
+
 app.post(
   "/api/todos",
   [authJwt.verifyToken, authJwt.isExist, authJwt.isAdmin],
@@ -44,6 +48,7 @@ app.post(
     }
   }
 );
+
 app.get(
   "/api/todos/:id",
   [authJwt.verifyToken, authJwt.isExist],
@@ -65,9 +70,10 @@ app.get(
     }
   }
 );
+
 app.put(
   "/api/todos/:id",
-  [authJwt.verifyToken, authJwt.isExist,authJwt.isAdmin],
+  [authJwt.verifyToken, authJwt.isExist, authJwt.isAdmin],
   async (req, res) => {
     const todo = await Todo.findById(req.params.id);
     if (!todo) {
@@ -86,10 +92,13 @@ app.put(
     res.status(200).json(updatedTodo);
   }
 );
+
 app.get("/api/unsecured", (req, res) => {
   res.send("unsecured");
 });
+
 app.post("/api/auth/signup", authcontroller.signup);
+
 app.post("/api/auth/signin", authcontroller.signin);
 
 app.post("/user", async (req, res) => {
@@ -150,4 +159,5 @@ app.put("/user/:username", async (req, res) => {
   const updatedUser = await user.save();
   res.status(200).json(updatedUser);
 });
+
 module.exports = app;
