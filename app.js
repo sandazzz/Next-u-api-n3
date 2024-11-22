@@ -146,7 +146,7 @@ app.put("/user/:username", async (req, res) => {
   if (clientETag !== currentETag) {
     return res.status(412).send("Precondition Failed: ETag mismatch");
   }
-  user.name = req.body.name;
+  user.name = req.body.name || user.name;
   const updatedUser = await user.save();
   res.status(200).json(updatedUser);
 });
